@@ -12,7 +12,7 @@ const usuarioRoutes = Router();
 //==================================
 //Crear usuario
 //==================================
-usuarioRoutes.post('/', verificaToken, (req: Request, res: Response) => {
+usuarioRoutes.post('/', verificaToken, (req: Request, res: Response) => {  //usuarioRoutes es nuestra ruta
     const body: IUsuario = req.body;   //body de tipo interfaz IUsuario, (req: es una peticion) que es igual a una peticion alojada en el body
     const usuario = new Usuario({      // const usuario crea una instancia del modelo usuario (new) instancia
         
@@ -69,7 +69,7 @@ usuarioRoutes.get('/'), verificaToken, (req: Request, res: Response) => {
 
 //==================================
 //Enlistar usuarios con paginacion
-//==================================
+//================================== // get('/:desde?/:limit? se especifica la ruta y que requiere el valor de var desde y limit
 usuarioRoutes.get('/:desde?/:limit?', verificaToken, (req: Request, res: Response) => {
     const admin = req.body.usuario;
 
@@ -83,7 +83,7 @@ usuarioRoutes.get('/:desde?/:limit?', verificaToken, (req: Request, res: Respons
     var desde = req.params.desde || 0;  //indica que es la 1er pagina a mostrar, var que recibe parametros x url x medio de params      
     desde = Number(desde);
 
-    var limit = req.params.limit || 2; //permite elegir cuantos registros mostrar en cada consulta
+    var limit = req.params.limit || 7; //permite elegir cuantos registros mostrar en cada consulta
     limit = Number (limit);
 
 
@@ -122,17 +122,24 @@ usuarioRoutes.get('/:desde?/:limit?', verificaToken, (req: Request, res: Respons
 });
 
 //==================================
-//buscar usario por filtro
+//buscar usario por filtro       
 //==================================
 usuarioRoutes.post('/buscar', verificaToken, (req: Request, res: Response) => {  
 
+    const admin = req.body.usuario;   //debemos de saber donde buscar si en el header o en el body
+    let regex = new RegExp( admin, 'i')
 
-    const termino: any = req.headers.termino;   //debemos de saber donde buscar si en el header o en el body
-    let regex = new RegExp( termino, 'i')
+    if(admin.role !== 'ADMIN_ROLE'){
+        return res.status(401).json({
+            ok: false,
+            mensaje: 'no eres adminsitrador'
+
+        });
+    }
 
     Usuario.find(
-        { $or: [{nombre: regex}, {apellido: regex}, {email: regex}]},
-        'id nombre apellido email')
+        { $or: [{nombre: regex}, {apellido: regex}, {email: regex}, {role: regex}]},
+        'nombre apellido email role')
 
         .exec((err: any, usuarioEnc) => {
 
@@ -144,40 +151,62 @@ usuarioRoutes.post('/buscar', verificaToken, (req: Request, res: Response) => {
                 });
             }
 
-            res.status(200).json({
-                ok: true,
-                resultados: usuarioEnc,
-                total: usuarioEnc.length     //length muestra el numero total de resultados
-            });
+            if(admin.role == 'ADMIN_ROLE'){
+                res.status(200).json({
+                    ok: true,
+                    resultados: usuarioEnc,
+                    total: usuarioEnc.length     //length muestra el numero total de resultados
+                });
+            }
+                
         });
 
 });
 
 //==================================
-//buscar usario por filtro de ROLES  TAREA X CONCLUIR
+//buscar usario por filtro de ROLES admin o user TAREA X CONCLUIR grab 5 min 40
 //==================================
-usuarioRoutes.post('/usad', verificaToken, (req: Request, res: Response) => {
+usuarioRoutes.post('/aduse', verificaToken, (req: Request, res: Response) => {
 
     const admin = req.body.usuario;
-    let regex = new RegExp(admin, 'i') // 'i' que ignore si es M o m
+    let regex = new RegExp(admin, 'i') // 'i' que ignore si es mayuscula o minuscula
 
-    if (admin.role !== admin)
-
-    Usuario.find({nombre: regex, role: regex },
-        'nombre role')
-    .exec((err: any, usuarioEnc) => {
-
-        res.status(200).json({
-            ok: true,
-            resultados: usuarioEnc,             //evitar ponerle el length por que no los enlista
-            total: usuarioEnc.length
+    if (admin.role !== 'ADMIN_ROLE'){
+        return res.status(401).json({
+            ok: false,
+            message: 'No eres administrador'
         });
-    });
+    }
 
+    Usuario.find({nombre:regex}, 'nombre')
+       .exec((err: any, usuarioEnc) => { //no dejar espacios .find({W:regex} porque no muestra nada
+
+            if(err){
+                return res.status(500).json({
+                    ok: false,
+                    message: 'error en la base de datos',
+                    err:err
+                });
+            }
+
+           if(err){
+                return res.status(404).json({
+                    ok: false,
+                    message: 'no existe usuario con letra N'
+
+                });
+            }
+
+            res.status(200).json({
+               ok: true,
+               resultados: usuarioEnc,            //evitar ponerle el length por que no los enlista
+               total: usuarioEnc.length
+            });
+       });
 });
 
 //==================================
-//buscar usario si eres admin   o por letra ?                 
+//buscar usario por rol admin           
 //==================================
 usuarioRoutes.post('/role', verificaToken, (req: Request, res: Response) => {
 
@@ -195,9 +224,8 @@ usuarioRoutes.post('/role', verificaToken, (req: Request, res: Response) => {
 const usuario: any = req.body.usuario;                       //debemos de saber donde buscar si en el header o en el body
     let regex = new RegExp( usuario, 'i')
 
-    Usuario.find(
-        { $or: [{nombre: regex}, {apellido: regex}, {email: regex}, {role: regex}]},  //busca coincidencias
-        'id nombre apellido email role')                                              //imprime lo encontrado en pantalla
+    Usuario.find({ $or: [{nombre: regex}, {apellido: regex}, {email: regex}, {role: regex}]},  //busca coincidencias
+        'nombre apellido email role')                                              //imprime lo encontrado en pantalla
 
         .exec((err: any, usuarioEnc) => {
 
@@ -222,12 +250,12 @@ const usuario: any = req.body.usuario;                       //debemos de saber 
 //==================================
 //Modificar usuario
 //==================================
-usuarioRoutes.put('/:id',verificaToken, (req: Request, res: Response) => {
+usuarioRoutes.put('/:id',verificaToken, (req: Request, res: Response) => { 
     const id = req.params.id;
     const body = req.body;
-    const usrtkn = req.body.usario
+    const usrtkn = req.body.usuario;
 
-    if (id !== usrtkn._id){
+    if (id !== usrtkn._id){                                   ///????????
         return res.status(400).json({
             ok: false,
             mensaje: 'estos no son tus datos'
@@ -254,6 +282,7 @@ usuarioRoutes.put('/:id',verificaToken, (req: Request, res: Response) => {
         usuarioActualizado.apellido = body.apellido;
         usuarioActualizado.email = body.email;
         usuarioActualizado.password = body.password;
+        usuarioActualizado.role = body.role;
 
         usuarioActualizado.save((err, usuarioGuardado) => {
             if (err){

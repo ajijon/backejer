@@ -12,7 +12,7 @@ const rolesValidos = {                    //es un arreglo de valores y mensaje
 
 export var usuarioSchema: Schema = new Schema({    // variable usuarioSchema que es de tipo Schema y tiene una instancia del
                                                    // squema (=new Schema el cual contiene role, nombre etc)
-    role: { type: String, enum: rolesValidos, default: 'USER_ROL' }, //enum enumero los roles validos, agrega por default el rol
+    role: { type: String, enum: rolesValidos, default: 'USER_ROLE' }, //enum enumero los roles validos, agrega por default el rol
     nombre: { type: String, required:[ true, 'nombre necesario']}, //en require si no fuera obligatorio se le pone false y no true
     apellido: { type: String, required: [ true, 'apellido necesario']}, 
     email: { type: String, unique: true, required: [ true, 'correo necesario']},     //unique hace unico un valor 

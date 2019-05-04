@@ -5,7 +5,7 @@ import {SEED} from '../global/environment';
 function verificaToken(req: Request, res: Response, next:any){
     const token: any = req.headers.authorization;  //token inyecta informacion al header mediante la palabra clave autorizacion
                                                    //(peticion, lugar, palabra clave)
-    console.log(req.headers.authorization);
+    //console.log(req.headers.authorization);
     
     verify(token, SEED, (err:any, decoded: any) => {   //verify verifica que exista un token y una semilla 
         if (err){                                      //y si son correctos que muestre la informacion del usuario
