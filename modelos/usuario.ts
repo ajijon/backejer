@@ -16,7 +16,7 @@ export var usuarioSchema: Schema = new Schema({    // variable usuarioSchema que
     nombre: { type: String, required:[ true, 'nombre necesario']}, //en require si no fuera obligatorio se le pone false y no true
     apellido: { type: String, required: [ true, 'apellido necesario']}, 
     email: { type: String, unique: true, required: [ true, 'correo necesario']},     //unique hace unico un valor 
-    password: { type: String, required: [ true, 'contraseña necesaria']}
+    password: { type: String, required: [ true, 'contraseña necesaria']}  // String la escribimos en may si es un tip de var????
 },
 
 { collection: 'usuario' } //en coleccion usuario guarda todos los registros ingresados

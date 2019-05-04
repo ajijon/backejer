@@ -99,7 +99,7 @@ usuarioRoutes.get('/:desde?/:limit?', verificaToken, (req: Request, res: Respons
                    err: err
                 });
             }
-            Usuario.countDocuments({ }, (err, conteo) => { //contabiliza todos tus registros de la consulta realizada
+            Usuario.countDocuments({ }, (err, conteo) => { //countDocu... contabiliza todos tus registros de la consulta realizada
 
                 if(err){
                     return res.status(500).json({
@@ -129,7 +129,7 @@ usuarioRoutes.post('/buscar', verificaToken, (req: Request, res: Response) => {
     const admin = req.body.usuario;   //debemos de saber donde buscar si en el header o en el body
     let regex = new RegExp( admin, 'i')
 
-    if(admin.role !== 'ADMIN_ROLE'){
+    if(admin.role !== 'ADMIN_ROLE'){  //admin.role viene del token y ADMIN_ROLE viene de modelos
         return res.status(401).json({
             ok: false,
             mensaje: 'no eres adminsitrador'
@@ -178,7 +178,7 @@ usuarioRoutes.post('/buscar/admin', verificaToken, (req: Request, res: Response)
         });
     }
 
-    Usuario.find({nombre:regex}, 'nombre', (err: any, usuarioDB) =>{
+    Usuario.find({nombre:regex}, 'nombre apellido role', (err: any, usuarioDB) =>{
         if(err){
             return res.status(500).json({
                 ok: false,
@@ -223,8 +223,7 @@ usuarioRoutes.post('/buscar/apellido', verificaToken, (req: Request, res: Respon
         });
     }
 
-    
-    Usuario.find({apellido:regex}, 'apellido', (err: any, usuarioAP) =>{
+    Usuario.find({apellido:regex}, 'nombre apellido role', (err: any, usuarioAP) =>{
         if(err){
             return res.status(500).json({
                 ok: false,
@@ -284,7 +283,7 @@ usuarioRoutes.put('/:id',verificaToken, (req: Request, res: Response) => {
         usuarioActualizado.nombre = body.nombre;
         usuarioActualizado.apellido = body.apellido;
         usuarioActualizado.email = body.email;
-        usuarioActualizado.password = body.password;                 //porque cuando se actualiza el pass ya no se encripta?????
+        usuarioActualizado.password = bcrypt.hashSync(body.password, 10); //para sincronizar la encriptacion 
         usuarioActualizado.role = body.role;
 
         usuarioActualizado.save((err, usuarioGuardado) => {

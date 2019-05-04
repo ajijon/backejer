@@ -15,7 +15,7 @@ exports.usuarioSchema = new mongoose_1.Schema({
     nombre: { type: String, required: [true, 'nombre necesario'] },
     apellido: { type: String, required: [true, 'apellido necesario'] },
     email: { type: String, unique: true, required: [true, 'correo necesario'] },
-    password: { type: String, required: [true, 'contraseña necesaria'] }
+    password: { type: String, required: [true, 'contraseña necesaria'] } // String la escribimos en may si es un tip de var????
 }, { collection: 'usuario' } //en coleccion usuario guarda todos los registros ingresados
 );
 exports.usuarioSchema.plugin(mongoose_unique_validator_1.default, { message: '{ PATH } debe ser unico' }); //plugin es una extension que ayuda a unique a
