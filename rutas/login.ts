@@ -30,7 +30,7 @@ loginRoutes.post('/', (req: Request, res: Response) => {
         }
 
         //compara la contraseña enriptada
-        if (!bcrypt.compareSync(body.password, usuarioDB.password)){
+        if (!bcrypt.compareSync(body.password, usuarioDB.password)){ //compara el pass ingresado con el de la BDg
             return res.status(400).json({
                 ok: false,
                 mensaje: 'credenciales incorrectas -password',

@@ -13,7 +13,7 @@ exports.usuarioSchema = new mongoose_1.Schema({
     // squema (=new Schema el cual contiene role, nombre etc)
     role: { type: String, enum: rolesValidos, default: 'USER_ROLE' },
     nombre: { type: String, required: [true, 'nombre necesario'] },
-    apellido: { type: String, required: [true, 'apellido necesario'] },
+    apellido: { type: String, required: [true, 'El apellido es necesario'] },
     email: { type: String, unique: true, required: [true, 'correo necesario'] },
     password: { type: String, required: [true, 'contraseña necesaria'] } // String la escribimos en may si es un tip de var????
 }, { collection: 'usuario' } //en coleccion usuario guarda todos los registros ingresados

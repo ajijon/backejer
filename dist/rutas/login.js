@@ -27,7 +27,7 @@ loginRoutes.post('/', function (req, res) {
             });
         }
         //compara la contraseña enriptada
-        if (!bcrypt_1.default.compareSync(body.password, usuarioDB.password)) {
+        if (!bcrypt_1.default.compareSync(body.password, usuarioDB.password)) { //compara el pass ingresado con el de la BDg
             return res.status(400).json({
                 ok: false,
                 mensaje: 'credenciales incorrectas -password',

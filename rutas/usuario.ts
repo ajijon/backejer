@@ -34,7 +34,7 @@ usuarioRoutes.post('/', verificaToken, (req: Request, res: Response) => {  //usu
             });
             
         }
-        usuarioGuardado.password = ':)'
+        usuarioGuardado.password = body.password
 
         res.status(200).json({
             ok: true,
@@ -70,7 +70,7 @@ usuarioRoutes.get('/'), verificaToken, (req: Request, res: Response) => {
 //==================================
 //Enlistar usuarios con paginacion
 //================================== // get('/:desde?/:limit? se especifica la ruta y que requiere el valor de var desde y limit
-usuarioRoutes.get('/:desde?/:limit?', verificaToken, (req: Request, res: Response) => {
+usuarioRoutes.get('/:desde?/:limit?', verificaToken, (req: Request, res: Response) => { // :desde/ indica ing valor
     const admin = req.body.usuario;
 
     if (admin.role !== 'ADMIN_ROLE'){                                      //( !== ) diferente de
@@ -83,7 +83,7 @@ usuarioRoutes.get('/:desde?/:limit?', verificaToken, (req: Request, res: Respons
     var desde = req.params.desde || 0;  //indica que es la 1er pagina a mostrar, var que recibe parametros x url x medio de params      
     desde = Number(desde);
 
-    var limit = req.params.limit || 7; //permite elegir cuantos registros mostrar en cada consulta
+    var limit = req.params.limit || 3; //permite elegir cuantos registros mostrar en cada consulta
     limit = Number (limit);
 
 
@@ -139,7 +139,7 @@ usuarioRoutes.post('/buscar', verificaToken, (req: Request, res: Response) => {
 
     Usuario.find(
         { $or: [{nombre: regex}, {apellido: regex}, {email: regex}, {role: regex}]},
-        'nombre apellido email role')
+        'nombre apelativo email role')
 
         .exec((err: any, usuarioEnc) => {
 
@@ -210,7 +210,7 @@ usuarioRoutes.post('/buscar/admin', verificaToken, (req: Request, res: Response)
 //==================================
 usuarioRoutes.post('/buscar/apellido', verificaToken, (req: Request, res: Response) => {
 
-    const termino: any = req.body.usuario.apellido; //termino hace la busqueda
+    const termino: any = req.body.usuario.apelativo; //termino hace la busqueda
     let regex = new RegExp(termino, 'i') // 'i' que ignore si es mayuscula o minuscula
     const user = req.body.usuario;
 
@@ -223,7 +223,7 @@ usuarioRoutes.post('/buscar/apellido', verificaToken, (req: Request, res: Respon
         });
     }
 
-    Usuario.find({apellido:regex}, 'nombre apellido role', (err: any, usuarioAP) =>{
+    Usuario.find({apellido:regex}, 'nombre apelativo role', (err: any, usuarioAP) =>{
         if(err){
             return res.status(500).json({
                 ok: false,

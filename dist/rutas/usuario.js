@@ -28,7 +28,7 @@ usuarioRoutes.post('/', autentication_1.default, function (req, res) {
                 err: err
             });
         }
-        usuarioGuardado.password = ':)';
+        usuarioGuardado.password = body.password;
         res.status(200).json({
             ok: true,
             mensaje: 'usuario guardado'
@@ -66,7 +66,7 @@ usuarioRoutes.get('/:desde?/:limit?', autentication_1.default, function (req, re
     }
     var desde = req.params.desde || 0; //indica que es la 1er pagina a mostrar, var que recibe parametros x url x medio de params      
     desde = Number(desde);
-    var limit = req.params.limit || 7; //permite elegir cuantos registros mostrar en cada consulta
+    var limit = req.params.limit || 3; //permite elegir cuantos registros mostrar en cada consulta
     limit = Number(limit);
     usuario_1.Usuario.find({}, 'nombre apellido email password role')
         .skip(desde) //funcion de mongoose que omite registros, su variable indica que es la 1er pagina a mostrar
@@ -107,7 +107,7 @@ usuarioRoutes.post('/buscar', autentication_1.default, function (req, res) {
             mensaje: 'no eres adminsitrador'
         });
     }
-    usuario_1.Usuario.find({ $or: [{ nombre: regex }, { apellido: regex }, { email: regex }, { role: regex }] }, 'nombre apellido email role')
+    usuario_1.Usuario.find({ $or: [{ nombre: regex }, { apellido: regex }, { email: regex }, { role: regex }] }, 'nombre apelativo email role')
         .exec(function (err, usuarioEnc) {
         if (err) {
             return res.status(500).json({
@@ -163,7 +163,7 @@ usuarioRoutes.post('/buscar/admin', autentication_1.default, function (req, res)
 //buscar usario por apellido        
 //==================================
 usuarioRoutes.post('/buscar/apellido', autentication_1.default, function (req, res) {
-    var termino = req.body.usuario.apellido; //termino hace la busqueda
+    var termino = req.body.usuario.apelativo; //termino hace la busqueda
     var regex = new RegExp(termino, 'i'); // 'i' que ignore si es mayuscula o minuscula
     var user = req.body.usuario;
     console.log(user);
@@ -173,7 +173,7 @@ usuarioRoutes.post('/buscar/apellido', autentication_1.default, function (req, r
             message: 'No eres administrador'
         });
     }
-    usuario_1.Usuario.find({ apellido: regex }, 'nombre apellido role', function (err, usuarioAP) {
+    usuario_1.Usuario.find({ apellido: regex }, 'nombre apelativo role', function (err, usuarioAP) {
         if (err) {
             return res.status(500).json({
                 ok: false,
