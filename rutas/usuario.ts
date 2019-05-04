@@ -122,7 +122,7 @@ usuarioRoutes.get('/:desde?/:limit?', verificaToken, (req: Request, res: Respons
 });
 
 //==================================
-//buscar usario por filtro       
+//buscar usario por / ruta buscar   
 //==================================
 usuarioRoutes.post('/buscar', verificaToken, (req: Request, res: Response) => {  
 
@@ -150,26 +150,26 @@ usuarioRoutes.post('/buscar', verificaToken, (req: Request, res: Response) => {
                     err: err
                 });
             }
-
-            if(admin.role == 'ADMIN_ROLE'){
                 res.status(200).json({
                     ok: true,
                     resultados: usuarioEnc,
                     total: usuarioEnc.length     //length muestra el numero total de resultados
                 });
-            }
-                
+            
         });
 
 });
 
 //==================================
-//buscar usario por filtro de ROLES admin o user TAREA X CONCLUIR grab 5 min 40
+//buscar usario por ADMIN
 //==================================
-usuarioRoutes.post('/aduse', verificaToken, (req: Request, res: Response) => {
+usuarioRoutes.post('/buscar/admin', verificaToken, (req: Request, res: Response) => {
 
+    const termino: any = req.body.usuario.nombre; //termino hace la busqueda 
+    let regex = new RegExp(termino, 'i') // 'i' que ignore si es mayuscula o minuscula
     const admin = req.body.usuario;
-    let regex = new RegExp(admin, 'i') // 'i' que ignore si es mayuscula o minuscula
+
+    console.log(admin);
 
     if (admin.role !== 'ADMIN_ROLE'){
         return res.status(401).json({
@@ -178,73 +178,77 @@ usuarioRoutes.post('/aduse', verificaToken, (req: Request, res: Response) => {
         });
     }
 
-    Usuario.find({nombre:regex}, 'nombre')
-       .exec((err: any, usuarioEnc) => { //no dejar espacios .find({W:regex} porque no muestra nada
-
-            if(err){
-                return res.status(500).json({
-                    ok: false,
-                    message: 'error en la base de datos',
-                    err:err
-                });
-            }
-
-           if(err){
-                return res.status(404).json({
-                    ok: false,
-                    message: 'no existe usuario con letra N'
-
-                });
-            }
-
-            res.status(200).json({
-               ok: true,
-               resultados: usuarioEnc,            //evitar ponerle el length por que no los enlista
-               total: usuarioEnc.length
+    Usuario.find({nombre:regex}, 'nombre', (err: any, usuarioDB) =>{
+        if(err){
+            return res.status(500).json({
+                ok: false,
+                message: 'error en la base de datos',
+                err:err
             });
-       });
-});
+        }
+
+        if (!usuarioDB){
+            return res.status(404).json({
+                ok: false,
+                mensaje: ' No existe un usuario con N'
+
+            });
+        }
+
+        res.status(200).json({
+            ok: true,
+            mensaje: 'Usuarios encontrados',
+            usuarios: usuarioDB.length,
+            total: usuarioDB
+        });
+    });
+});    
+
 
 //==================================
-//buscar usario por rol admin           
+//buscar usario por apellido        
 //==================================
-usuarioRoutes.post('/role', verificaToken, (req: Request, res: Response) => {
+usuarioRoutes.post('/buscar/apellido', verificaToken, (req: Request, res: Response) => {
 
-    const admin = req.body.usuario;
+    const termino: any = req.body.usuario.apellido; //termino hace la busqueda
+    let regex = new RegExp(termino, 'i') // 'i' que ignore si es mayuscula o minuscula
+    const user = req.body.usuario;
 
-    console.log(admin);
+    console.log(user);
 
-    if (admin.role !== 'ADMIN_ROLE'){
+    if (user.role !== 'USER_ROLE'){
         return res.status(401).json({
             ok: false,
-            mensaje: 'no eres administrador'
+            message: 'No eres administrador'
         });
     }
-                    //peticion (req), lugar(body) y ubicacion(usuario)
-const usuario: any = req.body.usuario;                       //debemos de saber donde buscar si en el header o en el body
-    let regex = new RegExp( usuario, 'i')
 
-    Usuario.find({ $or: [{nombre: regex}, {apellido: regex}, {email: regex}, {role: regex}]},  //busca coincidencias
-        'nombre apellido email role')                                              //imprime lo encontrado en pantalla
-
-        .exec((err: any, usuarioEnc) => {
-
-            if (err){
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'error en la base de datos al buscar usario',
-                    err: err
-                });
-            }
-
-            res.status(200).json({
-                ok: true,
-                resultados: usuarioEnc,
-                total: usuarioEnc.length     //length muestra el numero total de resultados
+    
+    Usuario.find({apellido:regex}, 'apellido', (err: any, usuarioAP) =>{
+        if(err){
+            return res.status(500).json({
+                ok: false,
+                message: 'error en la base de datos',
+                err:err
             });
-        });
+        }
 
-});
+        if (!usuarioAP){
+            return res.status(404).json({
+                ok: false,
+                mensaje: ' No existe un usuario con ese apellido'
+
+            });
+        }
+
+        res.status(200).json({
+            ok: true,
+            mensaje: 'Usuarios encontrados',
+            usuarios: usuarioAP.length,
+            total: usuarioAP
+        });
+    });
+});    
 
 
 //==================================
@@ -255,13 +259,12 @@ usuarioRoutes.put('/:id',verificaToken, (req: Request, res: Response) => {
     const body = req.body;
     const usrtkn = req.body.usuario;
 
-    if (id !== usrtkn._id){                                   ///????????
+    if (id !== usrtkn._id){                             
         return res.status(400).json({
             ok: false,
             mensaje: 'estos no son tus datos'
         });
     }
-
 
     Usuario.findById(id, (err, usuarioActualizado) => {
         if (err){
@@ -281,7 +284,7 @@ usuarioRoutes.put('/:id',verificaToken, (req: Request, res: Response) => {
         usuarioActualizado.nombre = body.nombre;
         usuarioActualizado.apellido = body.apellido;
         usuarioActualizado.email = body.email;
-        usuarioActualizado.password = body.password;
+        usuarioActualizado.password = body.password;                 //porque cuando se actualiza el pass ya no se encripta?????
         usuarioActualizado.role = body.role;
 
         usuarioActualizado.save((err, usuarioGuardado) => {
